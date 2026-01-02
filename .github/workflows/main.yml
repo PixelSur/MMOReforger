@@ -1,0 +1,92 @@
+name: Build Plugin
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      java_version:
+        description: 'Java Version'
+        required: false
+        default: '17'
+        type: choice
+        options:
+          - '11'
+          - '17'
+          - '21'
+      build_type:
+        description: 'Build Type'
+        required: false
+        default: 'package'
+        type: choice
+        options:
+          - 'package'
+          - 'clean package'
+          - 'clean package -DskipTests'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java_version || '17' }}
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2-
+          
+    - name: Verify Maven wrapper
+      run: |
+        if [ -f mvnw ]; then
+          chmod +x mvnw
+          echo "Using Maven wrapper"
+        else
+          echo "Using system Maven"
+        fi
+        
+    - name: Build with Maven
+      run: |
+        if [ -f mvnw ]; then
+          ./mvnw ${{ inputs.build_type || 'clean package' }}
+        else
+          mvn ${{ inputs.build_type || 'clean package' }}
+        fi
+      
+    - name: Verify JAR file exists
+      run: |
+        if [ -f target/MMOReforger.jar ]; then
+          echo "✅ JAR file built successfully"
+          ls -la target/MMOReforger.jar
+        else
+          echo "❌ JAR file not found!"
+          exit 1
+        fi
+      
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MMOReforger-${{ github.sha }}
+        path: target/MMOReforger.jar
+        retention-days: 30
+        
+    - name: Upload all artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-${{ github.sha }}
+        path: |
+          target/
+          *.log
+        retention-days: 7
