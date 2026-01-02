@@ -19,7 +19,7 @@ on:
       build_type:
         description: 'Build Type'
         required: false
-        default: 'package'
+        default: 'clean package'
         type: choice
         options:
           - 'package'
@@ -30,10 +30,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    defaults:
+      run:
+        shell: bash
+        
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Debug: List directory contents
+      run: |
+        pwd
+        ls -la
+        ls -la pom.xml
+        
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
@@ -48,22 +58,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-m2-
           
-    - name: Verify Maven wrapper
+    - name: Install Maven
       run: |
-        if [ -f mvnw ]; then
-          chmod +x mvnw
-          echo "Using Maven wrapper"
-        else
-          echo "Using system Maven"
-        fi
+        sudo apt-get update
+        sudo apt-get install -y maven
         
     - name: Build with Maven
       run: |
-        if [ -f mvnw ]; then
-          ./mvnw ${{ inputs.build_type || 'clean package' }}
-        else
-          mvn ${{ inputs.build_type || 'clean package' }}
-        fi
+        mvn ${{ inputs.build_type || 'clean package' }} -B -V
       
     - name: Verify JAR file exists
       run: |
@@ -72,6 +74,7 @@ jobs:
           ls -la target/MMOReforger.jar
         else
           echo "❌ JAR file not found!"
+          ls -la target/ || echo "Target directory not found"
           exit 1
         fi
       
@@ -82,7 +85,7 @@ jobs:
         path: target/MMOReforger.jar
         retention-days: 30
         
-    - name: Upload all artifacts
+    - name: Upload build logs
       uses: actions/upload-artifact@v4
       with:
         name: build-logs-${{ github.sha }}
