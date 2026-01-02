@@ -1,0 +1,59 @@
+# MMOReforger 配置文件
+
+# 强化成功率配置
+success-rates:
+  1: 100.0  # +1 成功率 100%
+  2: 90.0   # +2 成功率 90%
+  3: 80.0   # +3 成功率 80%
+  4: 70.0   # +4 成功率 70%
+  5: 60.0   # +5 成功率 60%
+  6: 50.0   # +6 成功率 50%
+  7: 40.0   # +7 成功率 40%
+  8: 30.0   # +8 成功率 30%
+  9: 20.0   # +9 成功率 20%
+  10: 10.0  # +10 成功率 10%
+
+# 强化失败惩罚
+failure-penalty:
+  break: false  # 失败是否破坏物品
+  decrease-level: true  # 失败是否降低等级
+  max-decrease: 1  # 最多降低等级数
+
+# 强化材料配置
+materials:
+  default:
+    type: MMOITEM  # 材料类型: MMOITEM 或 VANILLA
+    mmoitem-type: RESOURCE  # MMOItems物品类型
+    mmoitem-id: REINFORCEMENT_GEM  # MMOItems物品ID
+    vanilla-item: DIAMOND  # 原版物品（仅当type为VANILLA时使用）
+    amount: 5  # 每次强化需要的材料数量
+  # 可以为不同等级或类型的物品配置不同的强化材料
+  # weapon:
+  #   type: MMOITEM
+  #   mmoitem-type: RESOURCE
+  #   mmoitem-id: WEAPON_REINFORCEMENT
+  #   amount: 3
+
+# 属性提升配置
+stat-boosts:
+  default:
+    damage: 2.0  # 每次强化提升的伤害
+    defense: 1.5  # 每次强化提升的防御
+    attack-speed: 0.05  # 每次强化提升的攻击速度
+  # 可以为不同类型的物品配置不同的属性提升
+  # armor:
+  #   defense: 3.0
+  #   health: 10.0
+
+# 强化消息配置
+messages:
+  success: "&a强化成功！你的物品等级提升到了 +%level%！"
+  failure: "&c强化失败！"
+  break: "&4强化失败，物品被破坏！"
+  decrease: "&e强化失败，物品等级降低了 %decrease%！"
+  not-mmoitem: "&c你手中的物品不是MMOItems物品！"
+  no-materials: "&c你没有足够的强化材料！"
+  cooldown: "&e你需要等待 %time%s 才能再次强化！"
+
+# 冷却时间配置（秒）
+cooldown: 5
